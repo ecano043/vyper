@@ -18,9 +18,7 @@ struct Order:
     status: OrderStatus
     menuType: MenuType
     table: String[50]
-    waiter: address
-    chef: address
-    custumer: address
+    customer: String[50]
 
 struct Menu:
     name: String[50]
@@ -35,8 +33,28 @@ def __init__():
     self.owner = msg.sender
 
 @external
-def saveNewMenu(menu: Menu):
-    self.menus[menu.name] = menu
+def saveNewMenuStarter(name: String[50], price: uint256):
+    assert msg.sender == self.owner, "Esta funcion solo puede ser accedida por el owner"
+    menu: Menu = Menu({name: name, menuType: MenuType.STARTER, price: price})
+    self.menus[name] = menu
+
+@external
+def saveNewMenuMainCourse(name: String[50], price: uint256):
+    assert msg.sender == self.owner, "Esta funcion solo puede ser accedida por el owner"
+    menu: Menu = Menu({name: name, menuType: MenuType.MAIN_COURSE, price: price})
+    self.menus[name] = menu
+
+@external
+def saveNewMenuDessert(name: String[50], price: uint256):
+    assert msg.sender == self.owner, "Esta funcion solo puede ser accedida por el owner"
+    menu: Menu = Menu({name: name, menuType: MenuType.DESSERT, price: price})
+    self.menus[name] = menu
+
+@external
+def saveNewMenuDrink(name: String[50], price: uint256):
+    assert msg.sender == self.owner, "Esta funcion solo puede ser accedida por el owner"
+    menu: Menu = Menu({name: name, menuType: MenuType.DRINK, price: price})
+    self.menus[name] = menu
 
 @external
 def changeStateOrder(table: String[50], status: OrderStatus):
@@ -45,14 +63,15 @@ def changeStateOrder(table: String[50], status: OrderStatus):
     order.status = status
 
 @external
-def saveNewOrder(order: Order):
-    self.orders[order.table] = order
+def saveNewOrder(table: String[50], name: String[50]):
+    order: Order = Order({status: OrderStatus.ENQUEUED, menuType: MenuType.MAIN_COURSE, table: table, customer: name})
+    self.orders[table] = order
 
 @view
 @external
 def getOrder(table: String[50]) -> Order:
     order: Order = self.orders[table]
-    assert order.waiter != empty(address), "No hay orden para esa mesa, pregunte al mesero"
+    assert order.customer != empty(String[50]), "No hay cliente para esa mesa, pregunte al mesero"
     return order
 
 @view
